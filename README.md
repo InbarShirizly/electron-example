@@ -10,6 +10,8 @@ A modern photo editing Electron application built with React. MagnetCraft allows
 - **⚙️ Project Settings**: Configure project details and photo preferences
 - **🖨️ Print & Export**: Print photos or export in various formats
 
+
+
 ## Interface
 
 The app features a tabbed interface with four main sections:
