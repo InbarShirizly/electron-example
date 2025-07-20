@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>MagnetCraft Icon Generator</title>
+    <style>
+        body { margin: 0; padding: 20px; font-family: Arial; }
+        #icon-container { text-align: center; }
+        canvas { border: 1px solid #ccc; margin: 10px; }
+    </style>
+</head>
+<body>
+    <div id="icon-container">
+        <h1>MagnetCraft Icon</h1>
+        <canvas id="icon-canvas" width="1024" height="1024"></canvas>
+        <br>
+        <button onclick="downloadIcon()">Download PNG</button>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('icon-canvas');
+        const ctx = canvas.getContext('2d');
+        
+        function createIcon() {
+            // Create gradient background
+            const gradient = ctx.createLinearGradient(0, 0, 1024, 1024);
+            gradient.addColorStop(0, '#667eea');
+            gradient.addColorStop(0.5, '#764ba2');
+            gradient.addColorStop(1, '#f093fb');
+            
+            // Fill background with rounded rectangle
+            ctx.fillStyle = gradient;
+            roundRect(ctx, 50, 50, 924, 924, 150);
+            ctx.fill();
+            
+            // Create camera aperture-like design (for photo editing)
+            ctx.strokeStyle = 'white';
+            ctx.fillStyle = 'white';
+            ctx.lineWidth = 20;
+            
+            // Center circle
+            ctx.beginPath();
+            ctx.arc(512, 512, 200, 0, 2 * Math.PI);
+            ctx.stroke();
+            
+            // Aperture blades
+            const bladeCount = 8;
+            const radius = 300;
+            for (let i = 0; i < bladeCount; i++) {
+                const angle = (i * 2 * Math.PI) / bladeCount;
+                const x1 = 512 + Math.cos(angle) * 150;
+                const y1 = 512 + Math.sin(angle) * 150;
+                const x2 = 512 + Math.cos(angle) * radius;
+                const y2 = 512 + Math.sin(angle) * radius;
+                
+                ctx.beginPath();
+                ctx.moveTo(x1, y1);
+                ctx.lineTo(x2, y2);
+                ctx.stroke();
+            }
+            
+            // Center dot
+            ctx.beginPath();
+            ctx.arc(512, 512, 30, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            // Add "MC" text
+            ctx.font = 'bold 120px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillStyle = 'white';
+            ctx.fillText('MC', 512, 520);
+        }
+        
+        function roundRect(ctx, x, y, width, height, radius) {
+            ctx.beginPath();
+            ctx.moveTo(x + radius, y);
+            ctx.lineTo(x + width - radius, y);
+            ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+            ctx.lineTo(x + width, y + height - radius);
+            ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+            ctx.lineTo(x + radius, y + height);
+            ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+            ctx.lineTo(x, y + radius);
+            ctx.quadraticCurveTo(x, y, x + radius, y);
+            ctx.closePath();
+        }
+        
+        function downloadIcon() {
+            const link = document.createElement('a');
+            link.download = 'magnetcraft-icon-1024.png';
+            link.href = canvas.toDataURL();
+            link.click();
+        }
+        
+        // Create the icon
+        createIcon();
+    </script>
+</body>
+</html> 
