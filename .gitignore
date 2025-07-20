@@ -16,7 +16,11 @@ dist-packages/
 *.rpm
 *.AppImage
 *.blockmap
-*.yml
+latest*.yml
+builder-*.yml
+*-mac.yml
+*-win.yml
+*-linux.yml
 !assets/**
 
 # Development
