@@ -15,11 +15,7 @@ permissions:
 
 jobs:
   build:
-    runs-on: ${{ matrix.os }}
-    
-    strategy:
-      matrix:
-        os: [macos-latest, ubuntu-latest, windows-latest]
+    runs-on: macos-latest
         
     steps:
     - name: Checkout code
@@ -38,27 +34,14 @@ jobs:
       run: npm run build
       
     - name: Build Electron app (macOS)
-      if: matrix.os == 'macos-latest'
       run: npm run dist-mac
-      env:
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        
-    - name: Build Electron app (Windows)
-      if: matrix.os == 'windows-latest'
-      run: npm run dist-win
-      env:
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        
-    - name: Build Electron app (Linux)
-      if: matrix.os == 'ubuntu-latest'
-      run: npm run dist-linux
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: dist-${{ matrix.os }}
+        name: dist-macos
         path: dist-packages/
         retention-days: 7
 
@@ -105,29 +88,15 @@ jobs:
           - Download the `.dmg` file for drag-and-drop installation
           - Download the `.zip` file for manual installation
           
-          **Windows:**
-          - Download the `.exe` installer for easy installation
-          - Download the portable `.exe` if you prefer not to install
-          
-          **Linux:**
-          - Download the `.AppImage` file (no installation required)
-          - Download the `.deb` package for Ubuntu/Debian systems
-          
           ### Installation Instructions
           
           **macOS**: Open the `.dmg` file and drag MagnetCraft to your Applications folder
-          
-          **Windows**: Run the `.exe` installer and follow the setup wizard
-          
-          **Linux**: Make the `.AppImage` executable and run it, or install the `.deb` package
           
           ---
           
           Built automatically from commit: ${{ github.sha }}
         files: |
-          artifacts/dist-macos-latest/*
-          artifacts/dist-windows-latest/*
-          artifacts/dist-ubuntu-latest/*
+          artifacts/dist-macos/*
         token: ${{ secrets.GITHUB_TOKEN }}
 
   # Deploy to GitHub Pages
