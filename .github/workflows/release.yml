@@ -1,0 +1,125 @@
+name: Build and Release
+
+on:
+  push:
+    branches: [ main ]
+    tags: [ 'v*' ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    
+    strategy:
+      matrix:
+        os: [macos-latest, ubuntu-latest, windows-latest]
+        
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: Build webpack bundle
+      run: npm run build
+      
+    - name: Build Electron app (macOS)
+      if: matrix.os == 'macos-latest'
+      run: npm run dist-mac
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        
+    - name: Build Electron app (Windows)
+      if: matrix.os == 'windows-latest'
+      run: npm run dist-win
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        
+    - name: Build Electron app (Linux)
+      if: matrix.os == 'ubuntu-latest'
+      run: npm run dist-linux
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: dist-${{ matrix.os }}
+        path: dist-packages/
+        retention-days: 7
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/main'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Download all artifacts
+      uses: actions/download-artifact@v4
+      with:
+        path: artifacts/
+        
+    - name: Display structure of downloaded files
+      run: find artifacts/ -type f -name "*" | head -20
+      
+    - name: Generate release tag
+      id: tag
+      run: |
+        if [[ $GITHUB_REF == refs/tags/* ]]; then
+          echo "tag=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+        else
+          echo "tag=v$(date +'%Y%m%d-%H%M%S')" >> $GITHUB_OUTPUT
+        fi
+        
+    - name: Create Release
+      id: create_release
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: ${{ steps.tag.outputs.tag }}
+        name: MagnetCraft ${{ steps.tag.outputs.tag }}
+        draft: false
+        prerelease: ${{ !startsWith(github.ref, 'refs/tags/') }}
+        body: |
+          ## MagnetCraft Release ${{ steps.tag.outputs.tag }}
+          
+          ### Downloads
+          
+          **macOS:**
+          - Download the `.dmg` file for drag-and-drop installation
+          - Download the `.zip` file for manual installation
+          
+          **Windows:**
+          - Download the `.exe` installer for easy installation
+          - Download the portable `.exe` if you prefer not to install
+          
+          **Linux:**
+          - Download the `.AppImage` file (no installation required)
+          - Download the `.deb` package for Ubuntu/Debian systems
+          
+          ### Installation Instructions
+          
+          **macOS**: Open the `.dmg` file and drag MagnetCraft to your Applications folder
+          
+          **Windows**: Run the `.exe` installer and follow the setup wizard
+          
+          **Linux**: Make the `.AppImage` executable and run it, or install the `.deb` package
+          
+          ---
+          
+          Built automatically from commit: ${{ github.sha }}
+        files: |
+          artifacts/dist-macos-latest/*
+          artifacts/dist-windows-latest/*
+          artifacts/dist-ubuntu-latest/*
+        token: ${{ secrets.GITHUB_TOKEN }} 
