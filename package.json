@@ -28,7 +28,6 @@
       "package.json"
     ],
     "mac": {
-      "icon": "assets/icon.icns",
       "category": "public.app-category.photography",
       "target": [
         {
@@ -48,7 +47,6 @@
       ]
     },
     "win": {
-      "icon": "assets/icon.ico",
       "target": [
         {
           "target": "nsis",
@@ -65,7 +63,6 @@
       ]
     },
     "linux": {
-      "icon": "assets/icon.png",
       "target": [
         {
           "target": "AppImage",
